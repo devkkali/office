@@ -1,18 +1,24 @@
+---
 deployment:
   tasks:
-    # Backend: Copy files (DO NOT DELETE, to keep .env and uploads safe)
-    - echo "==> Deploying Backend (api to office-backend-folder/api)"
-    # - mkdir -p /home2/roshande/office-backend-folder/api
-    - cp -r ${PWD}/api/* /home2/roshande/office-backend-folder/api/
+    # Backend: show, copy, and verify
+    - echo "==== DEPLOYING BACKEND ===="
+    - ls -lah ${PWD}/api/
+    - mkdir -p /home2/roshande/api
+    - cp -rv ${PWD}/api/* /home2/roshande/api/
+    - ls -lah /home2/roshande/api/
 
     # Backend: Laravel install & optimize
-    - cd /home2/roshande/office-backend-folder/api
+    - cd /home2/roshande/api
     - composer install --no-dev --optimize-autoloader
     - php artisan migrate --force
     - php artisan config:cache
     - php artisan route:cache
     - php artisan view:cache
 
-    # Frontend: Copy built files to live folder (no delete!)
-    - echo "==> Deploying Frontend (frontend/app to office.roshandevkota.com.np)"
-    - cp -r ${PWD}/frontend/app/* /home2/roshande/office.roshandevkota.com.np/
+    # Frontend: show, copy, and verify
+    - echo "==== DEPLOYING FRONTEND ===="
+    - ls -lah ${PWD}/frontend/app/
+    - mkdir -p /home2/roshande/office.roshandevkota.com.np
+    - cp -rv ${PWD}/frontend/app/* /home2/roshande/office.roshandevkota.com.np/
+    - ls -lah /home2/roshande/office.roshandevkota.com.np/
