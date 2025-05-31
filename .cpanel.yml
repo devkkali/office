@@ -1,6 +1,13 @@
 ---
 deployment:
   tasks:
+    # Frontend: show, copy, and verify
+    - echo "==== DEPLOYING FRONTEND ===="
+    - ls -lah ${PWD}/frontend/app/
+    - mkdir -p /home2/roshande/office.roshandevkota.com.np
+    - cp -rv ${PWD}/frontend/app/* /home2/roshande/office.roshandevkota.com.np/
+    - ls -lah /home2/roshande/office.roshandevkota.com.np/
+
     # Backend: show, copy, and verify
     - echo "==== DEPLOYING BACKEND ===="
     - ls -lah ${PWD}/api/
@@ -16,9 +23,3 @@ deployment:
     - php artisan route:cache
     - php artisan view:cache
 
-    # Frontend: show, copy, and verify
-    - echo "==== DEPLOYING FRONTEND ===="
-    - ls -lah ${PWD}/frontend/app/
-    - mkdir -p /home2/roshande/office.roshandevkota.com.np
-    - cp -rv ${PWD}/frontend/app/* /home2/roshande/office.roshandevkota.com.np/
-    - ls -lah /home2/roshande/office.roshandevkota.com.np/
