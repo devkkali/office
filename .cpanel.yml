@@ -1,0 +1,14 @@
+---
+deployment:
+  tasks:
+    - export DEPLOY_SOURCE="${PWD}"
+    - rm -rf /home2/roshande/office-backend-folder/*
+    - cp -r "${DEPLOY_SOURCE}/api/"* /home2/roshande/office-backend-folder/
+    - cd /home2/roshande/office-backend-folder
+    - composer install --no-dev --optimize-autoloader
+    - php artisan migrate --force
+    - php artisan config:cache
+    - php artisan route:cache
+    - php artisan view:cache
+    - rm -rf /home2/roshande/office-frontend-folder/*
+    - cp -r "${DEPLOY_SOURCE}/frontend/app/"* /home2/roshande/office-frontend-folder/
