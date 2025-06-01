@@ -3,16 +3,16 @@ deployment:
   tasks:
     # Frontend: show, copy, and verify
     - echo "==== DEPLOYING FRONTEND ===="
-    - ls -lah ${PWD}/frontend/app/
+    - ls -lah ${PWD}/frontend/out/
     - mkdir -p /home2/roshande/office.roshandevkota.com.np
-    - cp -rv ${PWD}/frontend/app/* /home2/roshande/office.roshandevkota.com.np/
+    - cp -rv ${PWD}/frontend/out/* /home2/roshande/office.roshandevkota.com.np/
     - ls -lah /home2/roshande/office.roshandevkota.com.np/
 
     # Backend: show, copy, and verify
     - echo "==== DEPLOYING BACKEND ===="
     - ls -lah ${PWD}/api/
     - mkdir -p /home2/roshande/api
-    - cp -rv ${PWD}/api/* /home2/roshande/api/
+    - cp -ru ${PWD}/api/* /home2/roshande/api/
     - ls -lah /home2/roshande/api/
 
     # Backend: Laravel install & optimize
