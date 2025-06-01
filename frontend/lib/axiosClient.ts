@@ -8,6 +8,7 @@ const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    'X-XSRF-TOKEN': authMode === "cookie" ? document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='))?.split('=')[1] : undefined,
   },
   withCredentials: authMode === "cookie",
 });
