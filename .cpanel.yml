@@ -1,25 +1,17 @@
 ---
 deployment:
   tasks:
-    # Frontend: show, copy, and verify
+    # Frontend: Deploy
     - echo "==== DEPLOYING FRONTEND ===="
-    - ls -lah ${PWD}/frontend/out/
-    - mkdir -p /home2/roshande/office.roshandevkota.com.np
-    - cp -rv ${PWD}/frontend/out/* /home2/roshande/office.roshandevkota.com.np/
-    - ls -lah /home2/roshande/office.roshandevkota.com.np/
+    - cp -ru /home2/roshande/office-deploy-source/frontend/out/* /home2/roshande/office.roshandevkota.com.np/
 
-    # Backend: show, copy, and verify
+    # Backend: Deploy
     - echo "==== DEPLOYING BACKEND ===="
-    - ls -lah ${PWD}/api/
-    - mkdir -p /home2/roshande/api
-    - cp -ru ${PWD}/api/* /home2/roshande/api/
-    - ls -lah /home2/roshande/api/
+    - cp -ru /home2/roshande/office-deploy-source/api/* /home2/roshande/api/
 
-    # Backend: Laravel install & optimize
+    # Laravel optimize (no composer!)
     - cd /home2/roshande/api
-    - composer install --no-dev --optimize-autoloader
     - php artisan migrate --force
     - php artisan config:cache
     - php artisan route:cache
     - php artisan view:cache
-
