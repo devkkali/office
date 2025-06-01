@@ -54,14 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       let res;
       if (authMode === "token") {
-        res = await axiosClient.post("/api/login", { email, password });
+        res = await axiosClient.post("/login", { email, password });
         if (res.data.token) localStorage.setItem("token", res.data.token);
       } else {
         await axiosClient.get("/sanctum/csrf-cookie");
-        res = await axiosClient.post("/api/login", { email, password });
+        res = await axiosClient.post("/login", { email, password });
       }
       // Fetch user after login
-      const userRes = await axiosClient.get("/api/me");
+      const userRes = await axiosClient.get("/me");
       setUser(userRes.data);
       router.replace("/");
     } catch (err) {
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await axiosClient.post("/api/logout");
+      await axiosClient.post("/logout");
     } catch {}
     localStorage.removeItem("token");
     setUser(null);
