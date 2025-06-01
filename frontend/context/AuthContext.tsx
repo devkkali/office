@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import axiosClient from "@/lib/axiosClient";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface User {
   id: number;
@@ -21,10 +21,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const authMode = process.env.NEXT_PUBLIC_AUTH_MODE;
 
-  // Get current user on mount
   useEffect(() => {
+    // 🟢 Only fetch user on non-login pages
+    if (pathname === "/login") {
+      setLoading(false);
+      return;
+    }
     const fetchUser = async () => {
       try {
         if (authMode === "token") {
@@ -41,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     fetchUser();
     // eslint-disable-next-line
-  }, []);
+  }, [pathname]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);

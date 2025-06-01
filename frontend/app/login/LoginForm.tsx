@@ -1,56 +1,52 @@
 "use client";
-import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 
 export default function LoginForm() {
+  const { login, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     try {
       await login(email, password);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
+      setError(err?.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md w-full mx-auto mt-20 p-8 rounded-2xl shadow-xl bg-white space-y-6">
-      <h1 className="text-3xl font-bold mb-4 text-center text-blue-700">Sign In</h1>
-      {error && <div className="bg-red-100 text-red-700 px-4 py-2 rounded">{error}</div>}
-      <input
-        className="w-full border p-3 rounded-lg focus:outline-none"
-        placeholder="Email"
-        type="email"
-        autoComplete="username"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-      />
-      <input
-        className="w-full border p-3 rounded-lg focus:outline-none"
-        placeholder="Password"
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-      />
-      <button
-        type="submit"
-        className="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition disabled:opacity-60"
-        disabled={loading}
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
-    </form>
+    <div className="max-w-sm mx-auto my-24 p-8 rounded-2xl bg-white shadow-xl">
+      <h2 className="text-2xl font-bold mb-6 text-blue-800">Login</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          className="mb-4 w-full px-4 py-2 border rounded"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
+        <input
+          className="mb-4 w-full px-4 py-2 border rounded"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
+        <button
+          className="w-full py-2 rounded bg-blue-700 text-white font-semibold"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+        {error && <div className="mt-3 text-red-600 text-sm">{error}</div>}
+      </form>
+    </div>
   );
 }
