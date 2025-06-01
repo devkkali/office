@@ -3,11 +3,11 @@ import { createContext, useContext, useEffect, useState } from "react";
 import axiosClient from "@/lib/axiosClient";
 import { useRouter, usePathname } from "next/navigation";
 
-interface User {
+export interface User {
   id: number;
   name: string;
   email: string;
-  role: string; // 'admin' | 'user'
+  role: string;
 }
 interface AuthContextType {
   user: User | null;
@@ -25,7 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const authMode = process.env.NEXT_PUBLIC_AUTH_MODE;
 
   useEffect(() => {
-    // 🟢 Only fetch user on non-login pages
+    if (!pathname) return;
+    // On /login, skip fetching user and set loading false immediately
     if (pathname === "/login") {
       setLoading(false);
       return;

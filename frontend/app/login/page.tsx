@@ -10,12 +10,16 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!loading && user) router.replace("/");
+    if (!loading && user) {
+      router.replace("/");
+    }
   }, [user, loading, router]);
 
-  // Show spinner if checking auth
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  // 1. If loading (checking auth), show a spinner.
+  if (loading) {
+    return <div className="p-10 text-center">Loading...</div>;
+  }
 
-  // Show form if not authenticated
+  // 2. Not logged in? Show the login form.
   return <LoginForm />;
 }
