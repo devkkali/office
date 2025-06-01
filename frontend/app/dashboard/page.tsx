@@ -3,7 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function HomePage() {
+export default function Dashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -18,7 +18,7 @@ export default function HomePage() {
       <div className="max-w-3xl mx-auto my-16 p-8 rounded-2xl bg-white shadow-xl">
         <h1 className="text-3xl font-bold mb-4 text-blue-800">Admin Dashboard</h1>
         <p>Welcome, {user.name}!</p>
-        {/* admin content */}
+        {/* admin content here */}
       </div>
     );
   }
@@ -26,7 +26,7 @@ export default function HomePage() {
     <div className="max-w-3xl mx-auto my-16 p-8 rounded-2xl bg-white shadow-xl">
       <h1 className="text-3xl font-bold mb-4 text-green-700">User Dashboard</h1>
       <p>Welcome, {user.name}!</p>
-      {/* user content */}
+      {/* user content here */}
     </div>
   );
 }
