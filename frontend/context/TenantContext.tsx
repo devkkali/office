@@ -37,6 +37,9 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
       hostname === "localhost" ||
       hostname === "127.0.0.1"
     ) {
+        console.log("hostname", hostname);
+        console.log("main domain", mainDomain);
+        console.log("tenanet subdomains", allowed);
       if (hostname === mainDomain || hostname === "localhost" || hostname === "127.0.0.1") {
         setIsMainDomain(true);
         setIsTenant(false);
