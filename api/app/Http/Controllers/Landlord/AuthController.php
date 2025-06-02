@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    // Register (API or session)
     public function register(Request $request)
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:users,email',
+            'email'    => 'required|string|email|unique:landloard_users,email', // Correct table!
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -27,6 +28,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Registered successfully', 'user' => $user], 201);
     }
 
+    // Login (returns token if requested, else session)
     public function login(Request $request)
     {
         $request->validate([
@@ -34,28 +36,59 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::guard('landlord')->attempt($request->only('email', 'password'))) {
+        $user = LandlordUser::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $request->session()->regenerate();
+        // If this is an API request (frontend asks for token), return Sanctum token
+        $wantsToken = $request->boolean('as_token') || $request->header('X-Auth-Mode') === 'token';
 
-        return response()->json([
-            'message' => 'Logged in successfully',
-            'user' => Auth::guard('landlord')->user()
-        ]);
+        if ($wantsToken) {
+            $token = $user->createToken('landlord-api')->plainTextToken;
+            return response()->json([
+                'message' => 'Logged in (token)',
+                'token'   => $token,
+                'user'    => $user,
+            ]);
+        } else {
+            // Session/cookie
+            Auth::guard('landlord')->login($user);
+            $request->session()->regenerate();
+            return response()->json([
+                'message' => 'Logged in (session)',
+                'user'    => $user,
+            ]);
+        }
     }
 
+    // /me endpoint (works for both modes)
     public function me(Request $request)
     {
-        return response()->json(['user' => Auth::guard('landlord')->user()]);
+        $user = currentUser();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        return response()->json(['user' => $user]);
     }
 
+    // Logout (both session and token)
     public function logout(Request $request)
     {
-        Auth::guard('landlord')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $user = currentUser();
+
+        // Session/cookie logout
+        if (Auth::guard('landlord')->check()) {
+            Auth::guard('landlord')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // Token logout (delete current access token)
+        if ($user && method_exists($user, 'currentAccessToken')) {
+            $request->user()->tokens()->delete();
+        }
+
         return response()->json(['message' => 'Logged out']);
     }
 }

@@ -11,20 +11,17 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+Route::prefix('landlord')->group(function () {
+    Route::post('register', [LandlordAuthController::class, 'register']);
+    Route::post('login', [LandlordAuthController::class, 'login']);
 
-// foreach (config('tenancy.central_domains') as $domain) {
-//     Route::domain($domain)->middleware(['web', 'api'])
-//     // Route::domain($domain)
-//         ->group(function () {
-//             Route::post('register', [LandlordAuthController::class, 'register']);
-//             Route::post('login', [LandlordAuthController::class, 'login']);
-//             Route::middleware('auth:landlord')->group(function () {
-//                 Route::get('me', [LandlordAuthController::class, 'me']);
-//                 Route::post('logout', [LandlordAuthController::class, 'logout']);
-//                 Route::post('tenants', [TenantController::class, 'store']);
-//             });
-//         });
-// }
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('me', [LandlordAuthController::class, 'me']);
+        Route::post('logout', [LandlordAuthController::class, 'logout']);
+        Route::post('tenants', [TenantController::class, 'store']);
+    });
+});
+
 
 
 // foreach (config('tenancy.central_domains') as $domain) {
