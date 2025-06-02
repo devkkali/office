@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use App\Models\TenantUser;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ class AuthController extends Controller
     }
 
     // Login (returns token if requested, else session)
-    public function login(Request $request)
+    public function login(Request $request, Tenant $tenant)
     {
         $request->validate([
             'email'    => 'required|email',
@@ -41,7 +42,10 @@ class AuthController extends Controller
         }
 
         // 1️⃣ If it's an API route, always token-based:
-        if ($request->is('api/*')) {
+        // Check if this is a tenant API route: /{tenant}/api/*
+        // We check if the path is like 'TENANT/api/*'
+        $segments = $request->segments();
+        if (count($segments) > 1 && $segments[1] === 'api') {
             $token = $user->createToken('tenant-api')->plainTextToken;
             return response()->json([
                 'message' => 'Logged in (token)',
