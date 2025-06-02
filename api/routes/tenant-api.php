@@ -36,7 +36,6 @@ Route::group([
         InitializeTenancyByPath::class,
     ],
 ], function () {
-    Route::get('sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
     Route::post('register', [TenantAuthController::class, 'register']);
     Route::post('login', [TenantAuthController::class, 'login']);
     Route::middleware('auth:tenant')->group(function () {

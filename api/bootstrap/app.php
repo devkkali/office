@@ -12,8 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::middleware('api')
-                ->group(base_path('routes/tenant-api.php'));
+            require base_path('routes/tenant-api.php');
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
