@@ -15,7 +15,7 @@ export default function AdminDashboard({ user }: { user: User }) {
     setSuccess(null);
     setError(null);
     try {
-      const res = await axiosClient.post("/tenants", { name: tenantName });
+      const res = await axiosClient.post("/tenants", { id: tenantName });
       setSuccess("Tenant created: " + res.data?.name);
       setTenantName("");
     } catch (err: any) {
