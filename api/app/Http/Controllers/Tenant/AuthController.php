@@ -27,6 +27,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Registered successfully', 'user' => $user], 201);
     }
 
+    // Login (returns token if requested, else session)
     public function login(Request $request)
     {
         $request->validate([
@@ -34,28 +35,58 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::guard('tenant')->attempt($request->only('email', 'password'))) {
+        $user = TenantUser::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        // 1️⃣ If it's an API route, always token-based:
+        if ($request->is('api/*')) {
+            $token = $user->createToken('tenant-api')->plainTextToken;
+            return response()->json([
+                'message' => 'Logged in (token)',
+                'token'   => $token,
+                'user'    => $user,
+            ]);
+        }
+
+        // 2️⃣ Otherwise, always session/cookie-based:
+        Auth::guard('tenant')->login($user);
         $request->session()->regenerate();
 
         return response()->json([
-            'message' => 'Logged in successfully',
-            'user' => Auth::guard('tenant')->user()
+            'message' => 'Logged in (session)',
+            'user'    => $user,
         ]);
     }
 
+    // /me endpoint (works for both modes)
     public function me(Request $request)
     {
-        return response()->json(['user' => Auth::guard('tenant')->user()]);
+        $user = currentUser();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        return response()->json(['user' => $user]);
     }
 
+    // Logout (both session and token)
     public function logout(Request $request)
     {
-        Auth::guard('tenant')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $user = currentUser();
+
+        // Session/cookie logout
+        if (Auth::guard('tenant')->check()) {
+            Auth::guard('tenant')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // Token logout (delete current access token)
+        if ($user && method_exists($user, 'currentAccessToken')) {
+            $request->user()->currentAccessToken()->delete();
+        }
+
         return response()->json(['message' => 'Logged out']);
     }
 }

@@ -15,7 +15,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:landloard_users,email', // Correct table!
+            'email'    => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
