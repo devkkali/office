@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import { getSubdomain } from "@/lib/tenantUtils";
 
 const authMode = process.env.NEXT_PUBLIC_AUTH_MODE;
@@ -12,35 +12,47 @@ const axiosClient = axios.create({
   withCredentials: authMode === "cookie",
 });
 
-// Intercept requests: prefix subdomain if needed, add token if needed
-axiosClient.interceptors.request.use((config) => {
-  const subdomain = getSubdomain(); // Utility you wrote, gets current subdomain if on tenant
-  if (subdomain && config.url && !config.url.startsWith(`/${subdomain}/`)) {
-    config.url = `/${subdomain}${config.url.startsWith("/") ? "" : "/"}${config.url}`;
+axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  let url = config.url || "";
+
+  const subdomain = getSubdomain();
+  if (
+    subdomain &&
+    !url.startsWith(`/${subdomain}/`) &&
+    !url.startsWith("/api/")
+  ) {
+    url = `/${subdomain}${url.startsWith("/") ? "" : "/"}${url}`;
   }
+
+  if (
+    authMode === "token" &&
+    !url.startsWith("/api/")
+  ) {
+    url = `/api${url.startsWith("/") ? "" : "/"}${url}`;
+  }
+
+  config.url = url;
+
   if (authMode === "token") {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token && config.headers)
+      (config.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
-
-  // Cookie-based CSRF protection
   if (authMode === "cookie" && typeof window !== "undefined") {
     const xsrfToken = getCookie("XSRF-TOKEN");
-    console.log("XSRF-TOKEN from cookie:", xsrfToken);
-    if (xsrfToken) {
-      console.log("Using XSRF-TOKEN from cookie:", xsrfToken);
-      config.headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfToken);
+    if (xsrfToken && config.headers) {
+      (config.headers as Record<string, string>)["X-XSRF-TOKEN"] = decodeURIComponent(xsrfToken);
     }
   }
+
   return config;
 });
 
-// Helper to read cookie value by name
-function getCookie(name: string) {
+function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
   const value = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
-  return value ? value.pop() : null;
+  return value ? value.pop() ?? null : null;
 }
 
 export default axiosClient;
