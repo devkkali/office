@@ -41,26 +41,26 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        // If this is an API request (frontend asks for token), return Sanctum token
-        $wantsToken = $request->boolean('as_token') || $request->header('X-Auth-Mode') === 'token';
-
-        if ($wantsToken) {
+        // 1️⃣ If it's an API route, always token-based:
+        if ($request->is('api/*')) {
             $token = $user->createToken('landlord-api')->plainTextToken;
             return response()->json([
                 'message' => 'Logged in (token)',
                 'token'   => $token,
                 'user'    => $user,
             ]);
-        } else {
-            // Session/cookie
-            Auth::guard('landlord')->login($user);
-            $request->session()->regenerate();
-            return response()->json([
-                'message' => 'Logged in (session)',
-                'user'    => $user,
-            ]);
         }
+
+        // 2️⃣ Otherwise, always session/cookie-based:
+        Auth::guard('landlord')->login($user);
+        $request->session()->regenerate();
+
+        return response()->json([
+            'message' => 'Logged in (session)',
+            'user'    => $user,
+        ]);
     }
+
 
     // /me endpoint (works for both modes)
     public function me(Request $request)
