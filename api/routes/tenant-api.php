@@ -38,7 +38,7 @@ Route::group([
 ], function () {
     Route::post('register', [TenantAuthController::class, 'register']);
     Route::post('login', [TenantAuthController::class, 'login']);
-    Route::middleware('auth:tenant')->group(function () {
+    Route::middleware('auth:tenant-api')->group(function () {
         Route::get('me', [TenantAuthController::class, 'me']);
         Route::post('logout', [TenantAuthController::class, 'logout']);
     });

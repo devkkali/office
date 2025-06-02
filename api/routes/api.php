@@ -17,7 +17,7 @@ foreach (config('tenancy.central_domains') as $domain) {
     ])->group(function () {
         Route::post('register', [LandlordAuthController::class, 'register']);
         Route::post('login', [LandlordAuthController::class, 'login']);
-        Route::middleware('auth:landlord')->group(function () {
+        Route::middleware('auth:landlord-api')->group(function () {
             Route::get('me', [LandlordAuthController::class, 'me']);
             Route::post('logout', [LandlordAuthController::class, 'logout']);
             Route::post('tenants', [TenantController::class, 'store']);

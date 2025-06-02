@@ -44,8 +44,16 @@ return [
             'driver' => 'session',
             'provider' => 'landloard_users',
         ],
+        'landlord-api' => [
+            'driver' => 'sanctum',
+            'provider' => 'landloard_users',
+        ],
         'tenant' => [
             'driver' => 'session',
+            'provider' => 'tenant_users',
+        ],
+        'tenant-api' => [
+            'driver' => 'sanctum',
             'provider' => 'tenant_users',
         ],
     ],
