@@ -12,6 +12,8 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  authMode?: "cookie" | "token";
+  setAuthMode: (mode: "cookie" | "token") => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -20,13 +22,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  // New state for auth mode
+  const [authMode, setAuthMode] = useState<"cookie" | "token">(
+    () => (typeof window !== "undefined" && localStorage.getItem("authMode") as "cookie" | "token")
+      || (process.env.NEXT_PUBLIC_AUTH_MODE as "cookie" | "token")
+      || "cookie"
+  );
   const router = useRouter();
   const pathname = usePathname();
-  const authMode = process.env.NEXT_PUBLIC_AUTH_MODE;
+
+  // Persist switch to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("authMode", authMode);
+  }, [authMode]);
 
   useEffect(() => {
     if (!pathname) return;
-    // On /login, skip fetching user and set loading false immediately
     if (pathname === "/login") {
       setLoading(false);
       return;
@@ -47,9 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     fetchUser();
     // eslint-disable-next-line
-  }, [pathname]);
+  }, [pathname, authMode]);
 
-  // Robust login with always-fresh CSRF
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
@@ -58,16 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         res = await axiosClient.post("/login", { email, password });
         if (res.data.token) localStorage.setItem("token", res.data.token);
       } else {
-        // Always get a new CSRF cookie before EVERY login attempt
         await axiosClient.get("/sanctum/csrf-cookie");
         res = await axiosClient.post("/login", { email, password });
       }
-      // Fetch user after login
       const userRes = await axiosClient.get("/me");
       setUser(userRes.data);
       router.replace("/");
     } catch (err) {
-      // Optional: try to clear user if login fails
       setUser(null);
       throw err;
     } finally {
@@ -79,18 +86,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await axiosClient.post("/logout");
     } catch {}
-    // Always clear local token & user
     localStorage.removeItem("token");
     setUser(null);
     router.replace("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, authMode, setAuthMode, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
+
 
 export function useAuth() {
   const ctx = useContext(AuthContext);

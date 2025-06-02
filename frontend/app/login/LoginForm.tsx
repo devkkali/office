@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 
 export default function LoginForm() {
-  const { login } = useAuth();
+  const { login, authMode, setAuthMode } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +25,33 @@ export default function LoginForm() {
   return (
     <div className="max-w-sm mx-auto my-24 bg-white p-8 rounded-2xl shadow-xl">
       <h2 className="text-3xl font-bold mb-8 text-center text-blue-800 tracking-tight">🔐 Sign In</h2>
+
+      {/* === Auth Mode Switch === */}
+      <div className="flex items-center justify-center gap-6 mb-8">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="authMode"
+            value="cookie"
+            checked={authMode === "cookie"}
+            onChange={() => setAuthMode("cookie")}
+            className="accent-blue-600"
+          />
+          <span className="text-gray-700">Cookie</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="authMode"
+            value="token"
+            checked={authMode === "token"}
+            onChange={() => setAuthMode("token")}
+            className="accent-blue-600"
+          />
+          <span className="text-gray-700">Token</span>
+        </label>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block mb-1 text-gray-700 font-semibold">Email</label>

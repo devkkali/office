@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { FaBug } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext"; // <-- import the context
 
 const mode = process.env.NODE_ENV;
 const mainDomain = process.env.NEXT_PUBLIC_FRONTEND_DOMAIN;
@@ -15,25 +16,23 @@ const color =
     : "bg-gray-500";
 
 export default function EnvBubble() {
+  // 🟢 Get authMode from context
+  const { authMode } = useAuth();
+
   const [open, setOpen] = useState(false);
-  // These store the "logical" position (we only setPos at the end of drag)
   const [pos, setPos] = useState({ x: 24, y: 24 });
-  // These refs are for fast, smooth, *temporary* updates during drag
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const bubbleRef = useRef<HTMLDivElement>(null);
   const movedDuringDrag = useRef(false);
 
-  // Set the transform for initial position and whenever pos changes
   React.useEffect(() => {
     if (bubbleRef.current) {
       bubbleRef.current.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
     }
   }, [pos.x, pos.y]);
 
-  // DRAG EVENTS
   const onMouseDown = (e: React.MouseEvent) => {
-    // Only left mouse button
     if (e.button !== 0) return;
     dragging.current = true;
     movedDuringDrag.current = false;
@@ -52,7 +51,6 @@ export default function EnvBubble() {
     if (!dragging.current || !bubbleRef.current) return;
     let nx = e.clientX - offset.current.x;
     let ny = e.clientY - offset.current.y;
-    // Clamp within viewport
     const el = bubbleRef.current;
     const maxX = window.innerWidth - el.offsetWidth - 8;
     const maxY = window.innerHeight - el.offsetHeight - 8;
@@ -62,9 +60,8 @@ export default function EnvBubble() {
     movedDuringDrag.current = true;
   };
 
-  const onMouseUp = (e: MouseEvent) => {
+  const onMouseUp = () => {
     if (dragging.current && bubbleRef.current) {
-      // Save final pos to state so it's sticky after expand/collapse
       const el = bubbleRef.current;
       const transform = el.style.transform;
       const match = /translate\(([\d.]+)px, ([\d.]+)px\)/.exec(transform);
@@ -77,13 +74,11 @@ export default function EnvBubble() {
     document.removeEventListener("mouseup", onMouseUp);
   };
 
-  // Only toggle open/close if you didn't drag
-  const onClick = (e: React.MouseEvent) => {
+  const onClick = () => {
     if (!movedDuringDrag.current) setOpen((v) => !v);
     movedDuringDrag.current = false;
   };
 
-  // Responsive glassmorphism style
   const glass = "backdrop-blur-md bg-white/70 shadow-xl";
   const closedBg = color + " shadow-lg";
   const border = open ? "border border-white/30" : "";
@@ -128,6 +123,22 @@ export default function EnvBubble() {
               ) : (
                 <span className="text-yellow-700">Development</span>
               )}
+            </div>
+            {/* 🟢 Auth Mode Section */}
+            <div className="mb-2 text-[13px]">
+              <span className="font-semibold">Auth Mode:</span>
+              <br />
+              <span
+                className={`inline-block rounded px-2 my-0.5 ${
+                  authMode === "token"
+                    ? "bg-orange-100 text-orange-800"
+                    : "bg-blue-100 text-blue-800"
+                }`}
+              >
+                {authMode === "token"
+                  ? "Token (Bearer)"
+                  : "Cookie (Sanctum)"}
+              </span>
             </div>
             <div className="mb-2 text-[13px]">
               <span className="font-semibold">Main Domain:</span>

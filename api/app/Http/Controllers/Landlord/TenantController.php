@@ -8,39 +8,42 @@ use App\Models\Tenant;
 
 class TenantController extends Controller
 {
-    public function store(Request $request)
-    {
-        $request->validate([
-            'id' => 'required|string|unique:tenants,id',
+public function store(Request $request)
+{
+    $request->validate([
+        'id' => 'required|string|unique:tenants,id',
+    ]);
+
+    try {
+        $centralDomains = config('tenancy.central_domains');
+        $mainDomain = $centralDomains[0] ?? 'localhost';
+
+        // Build the database name automatically
+        $database = env('TENANT_DATABASE_PREFIX', ''). 'tenant_combined_' . $request->id;
+
+        $tenant = Tenant::create([
+            'id' => $request->id,
+            'data' => [
+                'database' => $database,
+            ],
+            'domains' => [
+                [
+                    'domain' => $request->input('domain', $request->id . '.' . $mainDomain),
+                ],
+            ],
         ]);
 
-        try {
-            $centralDomains = config('tenancy.central_domains');
-            $mainDomain = $centralDomains[0] ?? 'localhost';
+        return response()->json([
+            'message' => 'Tenant created successfully',
+            'tenant'  => $tenant,
+        ], 201);
 
-            $tenant = Tenant::create([
-                'id' => $request->id,
-                'domains' => [
-                    [
-                        'domain' => $request->input(
-                            'domain',
-                            $request->id . '.' . $mainDomain
-                        )
-                    ]
-                ],
-                // Optional: 'data' => [...]
-            ]);
-
-            return response()->json([
-                'message' => 'Tenant created successfully',
-                'tenant'  => $tenant,
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Tenant creation failed',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Tenant creation failed',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
+
 }

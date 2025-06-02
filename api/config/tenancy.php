@@ -42,6 +42,8 @@ return [
      */
     'database' => [
         'central_connection' => env('DB_CONNECTION', 'central'),
+        'auto_create_tenant_database' => false, // Automatically create tenant databases when a tenant is created.
+        'auto_delete_tenant_database' => false, // Automatically delete tenant databases when a tenant is deleted.
 
         /**
          * Connection used as a "template" for the dynamically created tenant database connection.
@@ -53,7 +55,7 @@ return [
          * Tenant database names are created like this:
          * prefix + tenant_id + suffix.
          */
-        'prefix' => 'tenant_combined_',
+        'prefix' => env('TENANT_DATABASE_PREFIX', '').'tenant_combined_',
         'suffix' => '',
 
         /**
