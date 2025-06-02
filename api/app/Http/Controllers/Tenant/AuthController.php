@@ -29,7 +29,7 @@ class AuthController extends Controller
     }
 
     // Login (returns token if requested, else session)
-    public function login(Request $request, Tenant $tenant)
+    public function login(Request $request)
     {
         $request->validate([
             'email'    => 'required|email',
