@@ -27,7 +27,9 @@ axiosClient.interceptors.request.use((config) => {
   // Cookie-based CSRF protection
   if (authMode === "cookie" && typeof window !== "undefined") {
     const xsrfToken = getCookie("XSRF-TOKEN");
+    console.log("XSRF-TOKEN from cookie:", xsrfToken);
     if (xsrfToken) {
+      console.log("Using XSRF-TOKEN from cookie:", xsrfToken);
       config.headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfToken);
     }
   }
