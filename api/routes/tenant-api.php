@@ -30,7 +30,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByPath;
 
 
 Route::group([
-    'prefix' => '{tenant}',
+    'prefix' => '{tenant}/api',
     'middleware' => [
         'api',
         InitializeTenancyByPath::class,
