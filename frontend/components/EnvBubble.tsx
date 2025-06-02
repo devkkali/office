@@ -1,12 +1,12 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { FaBug } from "react-icons/fa";
-import { useAuth } from "@/context/AuthContext"; // <-- import the context
 
 const mode = process.env.NODE_ENV;
 const mainDomain = process.env.NEXT_PUBLIC_FRONTEND_DOMAIN;
 const allowed = process.env.NEXT_PUBLIC_TENANT_SUBDOMAINS;
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+const authMode = process.env.NEXT_PUBLIC_AUTH_MODE;
 
 const color =
   mode === "production"
@@ -17,7 +17,6 @@ const color =
 
 export default function EnvBubble() {
   // 🟢 Get authMode from context
-  const { authMode } = useAuth();
 
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ x: 24, y: 24 });

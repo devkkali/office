@@ -12,8 +12,6 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  authMode?: "cookie" | "token";
-  setAuthMode: (mode: "cookie" | "token") => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -92,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, authMode, setAuthMode, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
