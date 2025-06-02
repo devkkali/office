@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const token = localStorage.getItem("token");
           if (!token) throw new Error("No token");
         }
-        const res = await axiosClient.get("/api/me");
+        const res = await axiosClient.get("/me");
         setUser(res.data);
       } catch {
         setUser(null);
@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line
   }, [pathname]);
 
+  // Robust login with always-fresh CSRF
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         res = await axiosClient.post("/login", { email, password });
         if (res.data.token) localStorage.setItem("token", res.data.token);
       } else {
+        // Always get a new CSRF cookie before EVERY login attempt
         await axiosClient.get("/sanctum/csrf-cookie");
         res = await axiosClient.post("/login", { email, password });
       }
@@ -65,6 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userRes.data);
       router.replace("/");
     } catch (err) {
+      // Optional: try to clear user if login fails
+      setUser(null);
       throw err;
     } finally {
       setLoading(false);
@@ -75,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await axiosClient.post("/logout");
     } catch {}
+    // Always clear local token & user
     localStorage.removeItem("token");
     setUser(null);
     router.replace("/login");
@@ -86,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be inside AuthProvider");
