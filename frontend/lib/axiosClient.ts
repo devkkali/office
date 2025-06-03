@@ -14,40 +14,48 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   let url = config.url || "";
-
   const subdomain = getSubdomain();
-  if (
-    subdomain &&
-    !url.startsWith(`/${subdomain}/`) &&
-    !url.startsWith("/api/")
-  ) {
-    url = `/${subdomain}${url.startsWith("/") ? "" : "/"}${url}`;
-  }
 
-  if (
-    authMode === "token" &&
-    !url.startsWith("/api/")
-  ) {
-    url = `/api${url.startsWith("/") ? "" : "/"}${url}`;
+  // Only do this for token mode
+  if (authMode === "token") {
+    // If url already starts with /{subdomain}/api/ or /api/, do nothing
+    const hasSubdomainApiPrefix =
+      subdomain && url.startsWith(`/${subdomain}/api/`);
+    const hasApiPrefix = url.startsWith("/api/");
+
+    if (subdomain) {
+      if (!hasSubdomainApiPrefix) {
+        // Remove leading slash if present
+        url = url.startsWith("/") ? url.substring(1) : url;
+        // Prepend subdomain/api/
+        url = `/${subdomain}/api/${url}`;
+      }
+    } else {
+      if (!hasApiPrefix) {
+        url = url.startsWith("/") ? url : "/" + url;
+        url = `/api${url}`;
+      }
+    }
+  } else {
+    // For cookie mode or other modes, you may want to handle differently or do nothing
+    if (subdomain && !url.startsWith(`/${subdomain}/`)) {
+      url = `/${subdomain}${url.startsWith("/") ? "" : "/"}${url}`;
+    }
   }
 
   config.url = url;
 
+  // Set Authorization header for token mode
   if (authMode === "token") {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (token && config.headers)
       (config.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
-  if (authMode === "cookie" && typeof window !== "undefined") {
-    const xsrfToken = getCookie("XSRF-TOKEN");
-    if (xsrfToken && config.headers) {
-      (config.headers as Record<string, string>)["X-XSRF-TOKEN"] = decodeURIComponent(xsrfToken);
-    }
-  }
-
   return config;
 });
+
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;

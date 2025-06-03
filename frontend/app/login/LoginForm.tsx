@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 
 export default function LoginForm() {
-  const { login } = useAuth(); // Removed authMode, setAuthMode
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
